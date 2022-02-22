@@ -99,6 +99,7 @@ def delay():
         
 @app.route(f'/{TEMP_ID}')
 def temp():
+    fridgeController.updateTemp()
     return str(fridgeController.tempF)
 
 if __name__ == '__main__':
@@ -108,7 +109,7 @@ if __name__ == '__main__':
     ctrl.start()
     logging.info("Controller Started")
 
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=32008)
 
     logging.info("Exiting")
 
