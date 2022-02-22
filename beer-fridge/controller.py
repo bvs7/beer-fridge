@@ -57,23 +57,7 @@ class FridgeController:
     def run(self):
         logging.info("Controller Running")
         while not self.quit:
-            self.tempC = self.temp_sensor.readTempC()
-            self.tempF = CtoF(self.tempC)
-            logging.debug(str(datetime.datetime.now()))
-            logging.info("Temp: {}, Fridge On?: {}".format(self.tempF, self.fridge_on))
-
-            if not self.fridge_on:
-                if self.tempF > self.upper_limit:
-                    if __name__ == "__main__":
-                        logging.info("FRIDGE ON")
-                    self.fridge_on = True
-                    GPIO.output(self.relay_pin, GPIO.HIGH)
-            else:
-                if self.tempF < self.lower_limit:
-                    if __name__ == "__main__":
-                        logging.info("FRIDGE OFF")
-                    self.fridge_on = False
-                    GPIO.output(self.relay_pin, GPIO.LOW)
+            self.updateTemp()
 
             n = 0
             while True:
@@ -81,6 +65,26 @@ class FridgeController:
                     break
                 n += 1
                 time.sleep(1)
+
+    def updateTemp(self): # TODO: thread safety
+        self.tempC = self.temp_sensor.readTempC()
+        self.tempF = CtoF(self.tempC)
+
+        logging.debug(str(datetime.datetime.now()))
+        logging.info("Temp: {}, Fridge On?: {}".format(self.tempF, self.fridge_on))
+
+        if not self.fridge_on:
+            if self.tempF > self.upper_limit:
+                if __name__ == "__main__":
+                    logging.info("FRIDGE ON")
+                self.fridge_on = True
+                GPIO.output(self.relay_pin, GPIO.HIGH)
+        else:
+            if self.tempF < self.lower_limit:
+                if __name__ == "__main__":
+                    logging.info("FRIDGE OFF")
+                self.fridge_on = False
+                GPIO.output(self.relay_pin, GPIO.LOW)
 
     def setUpperLimit(self, limit):
         try:
